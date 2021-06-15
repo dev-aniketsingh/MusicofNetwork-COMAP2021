@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# Library
+library(dygraphs)
+library(xts)          # To make the convertion data-frame / xts format
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+data <- read_csv("/Users/aniketsingh/Desktop/EconGamesDataset/inflationData.csv")
+library(ggplot2)
+library(dplyr)
+library(forecast)
+library(fpp2)
+```
+
+```{r}
+data$Date <- ymd_hms(data$Date)
+
+```
+```{r}
+# Finally the plot
+p <- dygraph(data) %>%
+  dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="#D8AE5A") %>%
+  dyRangeSelector() %>%
+  dyCrosshair(direction = "vertical") %>%
+  dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)  %>%
+  dyRoller(rollPeriod = 1)
+
+# save the widget
+# library(htmlwidgets)
+# saveWidget(p, file=paste0( getwd(), "/HtmlWidget/dygraphs318.html"))
+
+```
+```{r}
+p
+```
+
+```{r}
+df <- read_csv("/Users/aniketsingh/Desktop/EconGamesDataset/retailSalesData.csv")
+```
+
+```{r}
+
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+library(ggplot2)
+library(reshape2)
+meltdf <- melt(df,id="Month")
+ggplot(meltdf,aes(x=Month,y=value,colour=variable,group=variable)) + geom_line()
+```
+

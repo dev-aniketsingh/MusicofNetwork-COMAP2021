@@ -1,0 +1,301 @@
+---
+title: "Cluster Analysis"
+output:
+  html_document:
+    df_print: paged
+  md_document:
+    variant: gfm
+---
+
+
+
+```{r}
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
+```
+
+```{r}
+
+```
+```{r}
+# Demo data
+dataFrame <- data.frame(
+    row.names = c("Cluster1", "Cluster2", "Cluster3", "Cluster4", "Cluster5", "Cluster6","Cluster7", "Cluster8"),
+      danceability  = c(0.462768,
+                  0.571116,
+                  0.579466,
+                  0.466945,
+                  0.571816,
+                  0.398148,
+                  0.567809,
+                  0.577662),
+      energy = c(0.660065,
+                  0.668791,
+                  0.501928,
+                  0.248377,
+                  0.740841,
+                  0.231835,
+                  0.671333,
+                  0.659093),
+      valence = c(0.519812,
+                  0.645308,
+                  0.551688,
+                  0.375074,
+                  0.474908,
+                  0.321352,
+                  0.638481,
+                  0.610027),
+      tempo = c(123.146489,
+                  124.788352,
+                  116.72463,
+                  108.832019,
+                  121.811424,
+                  107.247818,
+                  125.218416,
+                  122.233564),
+      loudness = c(-9.674775,
+                  -8.443857,
+                  -13.525059,
+                  -14.293833,
+                  -6.440679,
+                  -18.371927,
+                  -8.508289,
+                  -8.673643),
+      mode =      c(0.766992,
+                  1,
+                  0.724675,
+                  0.818719,
+                  0.605831,
+                  0.658276,
+                  1,
+                  0.000058),
+      key =      c(5.152307,
+                  7.889345,
+                  5.455411,
+                  5.043572,
+                  5.353518,
+                  4.915057,
+                  1.505625,
+                  6.061981),
+      acousticness = c(0.337446,
+                  0.246507,
+                  0.667615,
+                  0.768006,
+                  0.127792,
+                  0.822575,
+                  0.235503,
+                  0.245567),
+      instrumentalness = c(0.104063,
+                  0.061779,
+                  0.040384,
+                  0.024459,
+                  0.055355,
+                  0.810241,
+                  0.06527,
+                  0.080217),
+      liveness = c(0.74412,
+                  0.16587,
+                  0.451109,
+                  0.163396,
+                  0.222406,
+                  0.160298,
+                  0.169933,
+                  0.168539),
+      speechiness = c(0.078185,
+                  0.056641,
+                  0.566624,
+                  0.043699,
+                  0.124288,
+                  0.046066,
+                  0.056656,
+                  0.063766),
+      explicit = c(0,
+                  0,
+                  0.067532,
+                  0,
+                  1,
+                  0.00023,
+                  0,
+                  0),
+      duration_ms = c(294168.6803,
+                  228394.3751,
+                  211418.1584,
+                  215777.2409,
+                  238373.3703,
+                  273708.4808,
+                  230335.4034,
+                  253892.4077)
+                  )
+dataFrame
+```
+
+
+```{r}
+normalize <- function(x) {
+return ((x - min(x)) / (max(x) - min(x))) }
+```
+
+
+```{r}
+dataFrame$tempo <- normalize(dataFrame$tempo)
+dataFrame$duration_ms <- normalize(dataFrame$duration_ms)
+dataFrame$loudness <- normalize(dataFrame$loudness)
+dataFrame$mode <- normalize(dataFrame$mode)
+dataFrame$key <- normalize(dataFrame$key)
+
+
+
+```
+
+
+```{r}
+
+```
+
+ 
+ 
+```{r}
+library(fmsb)
+max_min <- data.frame(
+   danceability = c(1, 0), energy = c(1, 0),
+  valence = c(1, 0), tempo = c(1, 0), loudness = c(1, 0),
+  mode = c(1, 0), key = c(1, 0), acousticness = c(1, 0), instrumentalness = c(1,0), liveness = c(1,0), speechiness = c(1,0),  explicit = c(1,0), duration_ms = c(1,0)
+)
+rownames(max_min) <- c("Max", "Min")
+
+# Bind the variable ranges to the data
+df <- rbind(max_min, dataFrame)
+df
+```
+```{r}
+# Plot the data for student 1
+library(scales)
+df_scaled <- round(apply(df, 2, scales::rescale), 2)
+df_scaled <- as.data.frame(df_scaled)
+head(df_scaled)
+```
+```{r}
+# Variables summary
+# Get the minimum and the max of every column  
+col_max <- apply(df_scaled, 2, max)
+col_min <- apply(df_scaled, 2, min)
+# Calculate the average profile 
+col_mean <- apply(df_scaled, 2, mean)
+# Put together the summary of columns
+col_summary <- t(data.frame(Max = col_max, Min = col_min, Average = col_mean))
+
+
+# Bind variables summary to the data
+df_scaled2 <- as.data.frame(rbind(col_summary, df_scaled))
+head(df_scaled2)
+```
+```{r}
+opar <- par() 
+# Define settings for plotting in a 3x4 grid, with appropriate margins:
+par(mar = rep(0.8,4))
+par(mfrow = c(2,4))
+# Produce a radar-chart for each student
+for (i in 6:nrow(df_scaled2)) {
+  radarchart(
+    df_scaled2[c(1:3, i), ],
+    pfcol = c("#99999980",NA),
+    pcol= c(NA,2), plty = 1, plwd = 2,
+    title = row.names(df_scaled2)[i]
+  )
+}
+# Restore the standard par() settings
+par <- par(opar)
+```
+
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterOne <- df[c("Max", "Min", "Cluster1"), ]
+radarchart(clusterOne)
+```
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterTwo <- df[c("Max", "Min", "Cluster2"), ]
+radarchart(clusterTwo)
+```
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterThree <- df[c("Max", "Min", "Cluster3"), ]
+radarchart(clusterThree)
+```
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterFour <- df[c("Max", "Min", "Cluster4"), ]
+radarchart(clusterFour)
+```
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterFive<- df[c("Max", "Min", "Cluster5"), ]
+radarchart(clusterFive)
+```
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterSix <- df[c("Max", "Min", "Cluster6"), ]
+radarchart(clusterSix)
+```
+
+```{r}
+# Plot the data for student 1
+library(fmsb)
+clusterSeven <- df[c("Max", "Min", "Cluster7"), ]
+radarchart(clusterSeven)
+```
+```{r}
+create_beautiful_radarchart <- function(data, color = "#00AFBB", 
+                                        vlabels = colnames(data), vlcex = 0.7,
+                                        caxislabels = NULL, title = NULL, ...){
+  radarchart(
+    data, axistype = 1,
+    # Customize the polygon
+    pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
+    # Customize the grid
+    cglcol = "grey", cglty = 1, cglwd = 0.8,
+    # Customize the axis
+    axislabcol = "grey", 
+    # Variable labels
+    vlcex = vlcex, vlabels = vlabels,
+    caxislabels = caxislabels, title = title, ...
+  )
+}
+```
+
+```{r}
+# Reduce plot margin using par()
+op <- par(mar = c(1, 2, 2, 2))
+# Create the radar charts
+create_beautiful_radarchart(
+  data = df, caxislabels = c(0, 5, 10, 15, 20),
+  color = c("#00AFBB", "#E7B800", "#FC4E07", "#33FF5B", "#9755F7", "#F9F63D", "#3DF9BA", "#F57527")
+)
+# Add an horizontal legend
+legend(
+  x = "bottom", legend = rownames(df[-c(1,2),]), horiz = TRUE,
+  bty = "n", pch = 20 , col = c("#00AFBB", "#E7B800", "#FC4E07", "#33FF5B", "#9755F7", "#F9F63D", "#3DF9BA", "#F57527"),
+  text.col = "black", cex = 0.5, pt.cex = 1.5
+  )
+par(op)
+```
+```{r}
+dataFrame
+df2 <- t(dataFrame) %>%
+  as.data.frame() %>%
+  rownames_to_column("Field")
+df2
+```
+

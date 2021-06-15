@@ -1,0 +1,112 @@
+---
+title: "Time Analysis"
+output:
+  html_document:
+    df_print: paged
+  md_document:
+    variant: gfm
+---
+
+```{r}
+# Library
+library(streamgraph)
+library(dplyr)
+library(streamgraph)
+ library(tidyverse)
+
+# Create data:
+data <- read_csv("/Users/aniketsingh/Desktop/music/pop.csv")
+library(ggplot2)
+library(dplyr)
+
+data$year <- as.integer(data$year)
+data$popularity <- as.double(data$popularity)
+data$Genre <- as.factor(data$Genre)    
+
+normalize <- function(x) {
+return ((x - min(x)) / (max(x) - min(x))) }
+data$popularity <- normalize(data$popularity)
+
+
+
+p1 <- streamgraph(data, key="Genre", value="popularity", date="year", height="300px", width="1000px")
+p1
+
+```
+```{r}
+streamgraph(data = data,"Genre", "popularity", "year", interactive = TRUE) %>%
+    sg_axis_x(10, "year", "%Y") %>%
+    sg_fill_tableau() %>%
+    sg_legend(show=TRUE, label="Genre: ")
+```
+
+
+```{r}
+p2 <- streamgraph(data, key="Genre", value="popularity", date="year" ,interpolate="linear" ,
+    width="400px", height="300px"
+    )
+p2
+```
+
+```{r}
+streamgraph(data, key="Genre",  value="popularity", date="year",
+            offset = "expand") %>%
+  sg_axis_x(2, "year", "%Y") %>%
+  sg_fill_tableau("cyclic") %>%
+  sg_legend(show=TRUE, label= "Genre: ") %>%
+  sg_annotate(label="Pop/Rock", x = "",y=0.91, color="#ffffff", size=18) %>%
+  sg_annotate(label="Mach and Elec", x = "", y=0.6, color="#ffffff", size=18) %>%
+  sg_annotate(label="Intermediate Goods",x = "", y=0.48, color="#ffffff", size=18) %>%
+  sg_annotate(label="Consumer Goods",x = "",  y=0.29, color="#ffffff", size=18) %>%
+  sg_annotate(label="Capital Goods", x = "", y=0.09, color="#ffffff", size=18)
+```
+
+
+
+```{r}
+# Shape: stacked barplot
+p3 <- streamgraph(data, key="Genre", value="popularity", date="year" ,interpolate="step" ,
+    width="400px", height="300px"
+    )
+p3
+```
+
+```{r}
+library(viridis)
+library(hrbrthemes)
+ggplot(data, aes(x=year, y=popularity, fill=Genre)) + 
+    geom_area(alpha=0.6 , size=.5, colour="white") +
+    scale_fill_viridis(discrete = T) +
+    theme_ipsum() + 
+    ggtitle("Music Evolution")
+```
+```{r}
+
+#imports the required libraries
+library(ggplot2)
+library(hrbrthemes)
+library(viridis)
+library(tidyverse)
+library(plotly)
+ p<-data%>%
+     ggplot(aes(x=year, y=popularity, fill=Genre, text=Genre))+
+     geom_area()+
+     scale_fill_viridis(discrete = T)+
+     theme(legend.position = 'none')+
+     theme_ipsum()+
+     ggtitle('Evolution of Music')
+ ggplotly(p, tootltip='text')
+```
+```{r}
+ggplot(data, aes(x=year, y=popularity, fill=Genre))+geom_area() 
+
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(hrbrthemes)
+ggplot(data, aes(x=year, y=popularity, group=Genre, color=Genre)) +
+    geom_line()
+```
+
